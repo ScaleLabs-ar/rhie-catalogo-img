@@ -1,0 +1,76 @@
+# RHIÉ — imágenes del catálogo con marco horneado
+
+Imágenes del catálogo de [rhie.com.ar](https://rhie.com.ar) con el marco de
+marca estampado encima, para los anuncios de catálogo de Meta.
+
+El feed vive en
+`https://scalelabs-ar.github.io/rhie-catalogo-img/feed_brandeado.csv` y las
+imágenes en `.../img/<hash>.jpg`.
+
+## Cómo funciona
+
+`sync.py` corre cada hora por GitHub Actions, al :10. Lee las páginas públicas
+de la tienda (no usa el token de la API de Tiendanube, que no tenemos), hornea
+el marco sobre las fotos nuevas y reescribe `feed_brandeado.csv`. Meta lee el
+feed al :20.
+
+Es idempotente: el nombre del archivo horneado es el hash de la URL original de
+la foto, así que una foto que ya se procesó no se vuelve a bajar.
+
+## El id del feed
+
+El `id` es el **id de variante de Tiendanube**, que es lo que el píxel manda en
+`content_ids`. Verificado el 19/11/2026 en la ficha del Difusor Amber Oud:
+
+```js
+const productVariantId = '1575588612';
+fb_params['content_ids'] = [productVariantId];
+```
+
+Ese mismo número es el `retailer_id` del producto en el catálogo original
+"Catálogo de RHIE" (`835267939657733`). Si el feed usara otro id, Meta no
+podría atribuir conversiones a productos y el catálogo quedaría ciego.
+
+## El horneado no recorta
+
+Las fotos de RHIÉ son verticales 2:3 sobre un fondo degradado (taupe arriba,
+mesa blanca abajo) y el catálogo de Meta se ve en 1:1. Se probaron las tres
+salidas:
+
+| Opción | Qué hace | Veredicto |
+|---|---|---|
+| recortar | ventana cuadrada alrededor del producto | descartada por Álvaro el 19/11/2026: corta producto |
+| entera | la foto completa y chica sobre fondo plano | descartada: desperdicia media tarjeta y se le ven los bordes |
+| banda | replica la columna del borde a los costados | **elegida**: no corta nada y la costura no se ve |
+
+La costura no se ve porque el fondo es un degradado suave. Rellenar con un
+color plano sí dejaría una línea visible.
+
+## Los claims del marco
+
+Los tres están verificados producto por producto el 19/11/2026:
+
+- **Envío gratis** — la etiqueta está en los 18 productos de la tienda.
+- **10% OFF por transferencia** — aparece en toda ficha.
+- **Hasta 3 cuotas sin interés** — 2 desde $78.000, 3 desde $116.000. El
+  "hasta" cubre que no aplica a todo el catálogo.
+
+Si alguno deja de ser cierto hay que regenerar `marco.png` y borrar `img/` para
+que se hornee todo de nuevo.
+
+## Dos guardas que no hay que sacar
+
+`sync.py` aborta sin tocar el feed si el sitemap o la tienda devuelven cero
+productos. Sin eso, un error transitorio de Tiendanube vacía el feed, Meta lo
+levanta vacío a la hora siguiente y la campaña se cae sin aviso.
+
+La concurrencia está en 3 hilos con 4 reintentos y backoff. Tiendanube corta
+cuando se le pega fuerte: con 6 hilos, 277 de 355 páginas de G4 volvieron con
+error aunque cada una servía bien de a una.
+
+## Correrlo a mano
+
+```bash
+pip install Pillow numpy
+python3 sync.py
+```
