@@ -150,3 +150,18 @@ Reglas que quedan:
    errores y el anuncio mostrar el catálogo equivocado.
 3. La campaña vieja `120254660990150202` quedó eliminada. Gasto: $0 en los tres
    niveles, se detectó antes de que entregara.
+
+### El nombre del archivo tiene que incluir el MARCO
+
+`slug()` hashea **la URL de la foto + el hash de `marco.png`**. Si dependiera
+solo de la foto, al cambiar el marco el archivo cambia de contenido pero **no
+de URL**, y Meta —que cachea las imágenes del catálogo por URL— sigue sirviendo
+la versión vieja para siempre.
+
+Pasó el 19/11/2026: se corrigió el claim del pie, se rehorneó todo, el hash del
+archivo publicado coincidía con el local, y en los anuncios se seguía leyendo
+"Envío gratis". Estaba documentado en el repo de Euromaglia y no se aplicó acá.
+
+Cambiar el marco ahora renombra las 19 imágenes, Meta las ve como nuevas y las
+vuelve a bajar. Las viejas quedan huérfanas en `img/`: se borran con
+`rm -rf img && python3 sync.py`.

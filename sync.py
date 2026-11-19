@@ -61,7 +61,20 @@ LIENZO = 1080
 HILOS = 3
 REINTENTOS = 4
 
-slug = lambda u: hashlib.sha1(u.encode()).hexdigest()[:16]
+def huella_marco():
+    """Hash del marco. Entra en el nombre de cada imagen horneada."""
+    return hashlib.sha1(open(MARCO, "rb").read()).hexdigest()[:8]
+
+
+def slug(u):
+    """Nombre del archivo horneado: hash de la URL de la foto + hash del MARCO.
+
+    El marco TIENE que entrar. Si el nombre depende solo de la foto, al cambiar
+    el marco el archivo cambia de contenido pero no de URL, y Meta —que cachea
+    las imagenes del catalogo por URL— sigue sirviendo la version vieja para
+    siempre. Paso el 19/11/2026: se corrigio el claim del pie, se rehorneo todo
+    y en los anuncios seguia leyendose el texto anterior."""
+    return hashlib.sha1((u + "|" + huella_marco()).encode()).hexdigest()[:16]
 
 
 def bajar(url, binario=False):
