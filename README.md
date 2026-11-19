@@ -48,15 +48,33 @@ color plano sí dejaría una línea visible.
 
 ## Los claims del marco
 
-Los tres están verificados producto por producto el 19/11/2026:
+- **Envío a todo el país** — envían a todo el país, pero **no gratis**.
+- **10% OFF por transferencia** — aparece en el texto de toda ficha.
+- **Hasta 3 cuotas sin interés** — 2 desde $78.000, 3 desde $116.000.
 
-- **Envío gratis** — la etiqueta está en los 18 productos de la tienda.
-- **10% OFF por transferencia** — aparece en toda ficha.
-- **Hasta 3 cuotas sin interés** — 2 desde $78.000, 3 desde $116.000. El
-  "hasta" cubre que no aplica a todo el catálogo.
+### El error de "Envío gratis" (19/11/2026)
+
+La primera versión del marco decía **"Envío gratis a todo el país"**. Las dos
+mitades estaban mal y las dos las puse yo:
+
+- **"a todo el país"** fue invento, no lo verifiqué en ningún lado.
+- **"envío gratis"** salió de contar el texto `Envío gratis` en el HTML de las
+  fichas. Esa detección es falsa: el nodo es
+  `js-free-shipping-minimum-label` (envío gratis **por monto mínimo**) y sale
+  con `style="display:none"` en los **18** productos, incluso en el de
+  $116.000. Además, en Descuentos → Envío gratis del panel de Tiendanube **no
+  hay ninguna regla creada**, está el estado vacío.
+
+**Regla:** para dar por bueno un claim leído del HTML no alcanza con que el
+texto esté. Hay que verificar que el nodo esté visible, y cruzarlo contra la
+configuración del panel.
+
+Lo detectó Álvaro preguntando de dónde lo había sacado. El marco viejo ya
+estaba horneado en las 21 imágenes del catálogo; se rehorneó todo.
 
 Si alguno deja de ser cierto hay que regenerar `marco.png` y borrar `img/` para
 que se hornee todo de nuevo.
+
 
 ## Dos guardas que no hay que sacar
 
