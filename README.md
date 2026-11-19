@@ -87,9 +87,9 @@ python3 sync.py
 | Catálogo brandeado | `1134611082720414` |
 | Feed horario | `2442216696309838`, lee el CSV al :20 |
 | Conjunto de productos | `2521912381545634` (en stock, 16 de 21) |
-| Campaña | `120254660990150202` |
-| Conjunto de anuncios | `120254660993210202` |
-| Anuncio | `120254661046010202` |
+| Campaña | `120254661091350202` (v2) |
+| Conjunto de anuncios | `120254661092980202` |
+| Anuncio | `120254661095730202` |
 | Creativo | `2224119674834035` |
 
 Primera importación: **21 de 21 productos, cero inválidos**.
@@ -106,3 +106,29 @@ nombre, estado y etiquetas. Para apagar las mejoras de Advantage+ hubo que
 crear un creativo nuevo con `degrees_of_freedom_spec` en OPT_OUT y cambiárselo
 al anuncio. Si quedan prendidas, Meta redibuja y expande la imagen y arruina el
 marco horneado.
+
+### La trampa cara: Meta eligió solo el catálogo de OTRO cliente
+
+Al crear la campaña **sin declarar catálogo**, Meta completó el
+`promoted_object` con su `recommended_catalog_id`, que para esta cuenta es
+**`313428176385786` — COBB Grill Argentina**, de otro negocio. El anuncio de
+Rhie quedó mostrando parrillas COBB. Lo detectó Álvaro mirando la vista previa
+del panel, no la API: ningún `active_errors` lo reporta.
+
+`ads_catalog_list_dpa_eligible_catalogs` lo confirma: el catálogo de RHIÉ
+figura **primero** entre los elegibles, pero `recommended_catalog_id` apunta a
+COBB igual. La recomendación cruza todos los catálogos que ve la identidad
+autenticada, no los del negocio de la cuenta.
+
+**Y el `promoted_object` de una campaña publicada es inmutable**: Meta rechaza
+el cambio con "Actualización del objeto promocionado no válida". No se arregla,
+hay que rehacer la campaña.
+
+Reglas que quedan:
+
+1. **Siempre pasar `promoted_object` con el `product_catalog_id` al crear la
+   campaña.** Nunca dejar que Meta lo complete.
+2. **Mirar la vista previa antes de activar.** La estructura puede estar sin
+   errores y el anuncio mostrar el catálogo equivocado.
+3. La campaña vieja `120254660990150202` quedó eliminada. Gasto: $0 en los tres
+   niveles, se detectó antes de que entregara.
