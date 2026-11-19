@@ -74,3 +74,35 @@ error aunque cada una servía bien de a una.
 pip install Pillow numpy
 python3 sync.py
 ```
+
+## Lo que quedó armado en Meta (19/11/2026)
+
+| Objeto | ID |
+|---|---|
+| Negocio | `1061671283703973` (Rhie) |
+| Cuenta publicitaria | `1748281746538867` (RHIE MKTG, ARS) |
+| Página | `1061665863704515` |
+| Píxel | `970240078981302` (RHIE AROMAS) |
+| Catálogo original | `835267939657733` — **no se toca** |
+| Catálogo brandeado | `1134611082720414` |
+| Feed horario | `2442216696309838`, lee el CSV al :20 |
+| Conjunto de productos | `2521912381545634` (en stock, 16 de 21) |
+| Campaña | `120254660990150202` |
+| Conjunto de anuncios | `120254660993210202` |
+| Anuncio | `120254661046010202` |
+| Creativo | `2224119674834035` |
+
+Primera importación: **21 de 21 productos, cero inválidos**.
+
+### Dos trampas que costaron tiempo
+
+**El `product_set_id` va en el ANUNCIO, no en el conjunto de anuncios.** Meta
+rechaza la publicación con "La configuración del conjunto de productos cambió
+de lugar". El `promoted_object` del conjunto lleva solo `pixel_id`,
+`custom_event_type` y `product_catalog_id`. Ya había pasado en Plyrap.
+
+**Los creativos son inmutables.** `ads_creative_update` solo deja cambiar
+nombre, estado y etiquetas. Para apagar las mejoras de Advantage+ hubo que
+crear un creativo nuevo con `degrees_of_freedom_spec` en OPT_OUT y cambiárselo
+al anuncio. Si quedan prendidas, Meta redibuja y expande la imagen y arruina el
+marco horneado.
